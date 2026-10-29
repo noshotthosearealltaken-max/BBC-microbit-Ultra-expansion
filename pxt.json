@@ -1,0 +1,21 @@
+{
+    "name": "ultra-expansion",
+    "version": "1.0.0",
+    "description": "Ultra Expansion Pack: filtered radio, command codes, melody playback, dynamic arrays and motor/servo blocks for the BBC micro:bit.",
+    "license": "MIT",
+    "dependencies": {
+        "core": "*",
+        "radio": "*"
+    },
+    "files": [
+        "main.ts",
+        "ultra.ts",
+        "README.md"
+    ],
+    "testFiles": [],
+    "supportedTargets": [
+        "microbit"
+    ],
+    "preferredEditor": "blocksprj",
+    "public": true
+}
