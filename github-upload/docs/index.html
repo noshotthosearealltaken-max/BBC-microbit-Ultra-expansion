@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ultra Melody Converter - MP3 to micro:bit</title>
+<meta name="description" content="Convert MP3, WAV or OGG audio into compact 8-bit MB8 melodies for the BBC micro:bit Ultra Expansion Pack.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">&#9835;</span>
+      <div>
+        <h1>Ultra Melody Converter</h1>
+        <p class="tagline">MP3 &rarr; 8-bit MB8 &rarr; MicroPython for the BBC micro:bit</p>
+      </div>
+    </div>
+    <nav class="header-links">
+      <a href="https://github.com/">GitHub</a>
+      <a href="#how">How it works</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap layout">
+  <section class="panel">
+    <h2>1. Pick your audio</h2>
+    <div id="dropzone" class="dropzone" tabindex="0" role="button"
+         aria-label="Choose an audio file or drop it here">
+      <p class="drop-title">Drop an MP3, WAV, OGG or M4A here</p>
+      <p class="drop-sub">or <span class="fake-link">browse your files</span></p>
+      <p id="fileName" class="file-name">No file selected</p>
+      <input id="fileInput" type="file" accept="audio/*" hidden>
+    </div>
+
+    <div class="settings">
+      <label class="field">
+        <span>Melody name</span>
+        <input id="melodyName" type="text" value="my_tune" spellcheck="false">
+      </label>
+      <label class="field">
+        <span>Max length (seconds)</span>
+        <input id="maxSeconds" type="number" min="0.2" max="10" step="0.1" value="4">
+      </label>
+      <label class="field">
+        <span>Sample rate</span>
+        <select id="sampleRate">
+          <option value="7812" selected>7812 Hz (hardware rate)</option>
+          <option value="8000">8000 Hz</option>
+          <option value="11025">11025 Hz</option>
+          <option value="16000">16000 Hz</option>
+          <option value="22050">22050 Hz</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Gain <output id="gainValue">1.0&times;</output></span>
+        <input id="gain" type="range" min="0.5" max="2" step="0.1" value="1">
+      </label>
+      <label class="field">
+        <span>Output</span>
+        <select id="outputStyle">
+          <option value="snippet" selected>register_melody() snippet</option>
+          <option value="module">Complete melodies.py module</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button id="convertBtn" class="btn primary" type="button" disabled>Convert</button>
+      <button id="playBtn" class="btn" type="button" disabled>Play 8-bit preview</button>
+      <button id="stopBtn" class="btn ghost" type="button" disabled>Stop</button>
+    </div>
+    <p id="status" class="status" role="status">Waiting for a file&hellip;</p>
+
+    <div id="stats" class="stats hidden">
+      <div><span class="stat-label">Source</span><span id="statSource" class="stat-value">-</span></div>
+      <div><span class="stat-label">Length</span><span id="statLength" class="stat-value">-</span></div>
+      <div><span class="stat-label">MB8 data</span><span id="statBytes" class="stat-value">-</span></div>
+      <div><span class="stat-label">Source code</span><span id="statSourceSize" class="stat-value">-</span></div>
+    </div>
+  </section>
+
+  <section class="panel output-panel">
+    <h2>2. Copy into your program</h2>
+    <div class="code-head">
+      <span>Generated MicroPython</span>
+      <div class="code-buttons">
+        <button id="copyBtn" class="btn small" type="button" disabled>Copy</button>
+        <button id="downloadBtn" class="btn small" type="button" disabled>Download .py</button>
+      </div>
+    </div>
+    <pre id="code" class="code"><code>Choose an audio file to generate melody data.</code></pre>
+    <div class="usage">
+      <h3>Then play it</h3>
+<pre class="code small-code"><code>import ultra_expansion as ultra
+import melodies            # only if you generated a module
+
+ultra.register_melody('my_tune', MY_TUNE)   # snippet style
+ultra.play_melody('my_tune')</code></pre>
+    </div>
+  </section>
+</main>
+
+<section id="how" class="wrap info">
+  <h2>How the conversion works</h2>
+  <div class="info-grid">
+    <article>
+      <h3>Mono at 7812 Hz</h3>
+      <p>The micro:bit's audio hardware plays 32 unsigned 8-bit samples every
+      4.096&nbsp;ms, which is 7812.5 samples per second. The converter mixes
+      your file to mono and resamples it to that rate so pitches stay correct.</p>
+    </article>
+    <article>
+      <h3>4 bits per sample</h3>
+      <p>MB8 stores each sample as a &minus;8&hellip;+7 step from the previous one.
+      Two samples fit in a byte, so a 4 second clip costs about 15&nbsp;KB of
+      data &mdash; small enough to paste into the Python editor.</p>
+    </article>
+    <article>
+      <h3>Same format on both sides</h3>
+      <p>The <code>MB8</code> header, nibble order and clamping rules match
+      <code>micropython/ultra_expansion.py</code> and
+      <code>tools/make_melody.py</code> exactly, so a melody produced here,
+      by the Python tool, or by hand all decode identically.</p>
+    </article>
+  </div>
+  <div class="tip">
+    <strong>Size tip:</strong> the micro:bit v2 has 128&nbsp;KB of RAM and the
+    Python editor counts pasted source against its own limits. Keep melodies
+    under about 4 seconds, or generate them with
+    <code>tools/make_melody.py</code> and flash the data as part of your
+    program. Micro:bit v1 has no <code>audio</code> module; the library falls
+    back to a buzzer approximation.
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Ultra Expansion Pack for the BBC micro:bit &middot; MIT licensed &middot;
+       Everything runs locally in your browser, no uploads.</p>
+  </div>
+</footer>
+
+<script src="converter.js"></script>
+</body>
+</html>
